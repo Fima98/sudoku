@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #8bac0f;
+  --bg-cell: #9bbc0f;
+  --bg-selected: #cadc82;
+  --border: #0f380f;
+  --text: #0f380f;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text);
+    font-family: "Press Start 2P", monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
