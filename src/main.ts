@@ -1,6 +1,8 @@
 import "./style.css";
-import { createBoard } from "./components/Board";
+import { createBoard, renderBoard } from "./components/Board";
 import { createKeypad } from "./components/Keypad";
+import generateGrid from "./lib/generateGrid";
+import type { CellState } from "./lib/types";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 
@@ -11,17 +13,18 @@ if (app) {
 
   // let currentState: GameState = "menu";
 
-  type CellState = {
-    value: string | null;
-    notes: Set<string>;
-  };
+  let gridState: CellState[][] = [];
+  for (let r = 0; r < 9; r++) {
+    const row: CellState[] = [];
+    for (let c = 0; c < 9; c++) {
+      row.push({ value: null, notes: new Set() });
+    }
+    gridState.push(row);
+  }
 
-  const gridState: CellState[][] = Array.from({ length: 9 }, () =>
-    Array.from({ length: 9 }, () => ({
-      value: null,
-      notes: new Set(),
-    })),
-  );
+  const solvedGrid = generateGrid();
+
+  gridState = solvedGrid;
 
   let currentTool: { value: string | null; isNote: boolean } = {
     value: null,
@@ -90,6 +93,8 @@ if (app) {
       }
     }
   });
+
+  renderBoard(board, gridState);
 
   app.appendChild(board);
   app.appendChild(keyPad);

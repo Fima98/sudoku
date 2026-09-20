@@ -1,8 +1,7 @@
+import type { CellState } from "../lib/types";
+
 export function createBoard(
-  onCellSelect: (
-    cell: HTMLElement,
-    coords: { row: number; col: number },
-  ) => void,
+  onCellSelect: (cell: HTMLElement) => void,
 ): HTMLDivElement {
   const container = document.createElement("div");
   container.className =
@@ -42,11 +41,24 @@ export function createBoard(
     target.classList.add("!bg-[var(--bg-selected)]");
     selectedCellEl = target;
 
-    onCellSelect(target, {
-      row: Number(target.dataset.row),
-      col: Number(target.dataset.col),
-    });
+    onCellSelect(target);
   });
 
   return container;
+}
+
+export function renderBoard(boardEl: HTMLElement, state: CellState[][]) {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = boardEl.querySelector<HTMLElement>(
+        `[data-row="${r}"][data-col="${c}"]`,
+      );
+      if (!cell) continue;
+      const cellData = state[r][c];
+      if (cellData.value) {
+        cell.replaceChildren();
+        cell.textContent = cellData.value;
+      }
+    }
+  }
 }
