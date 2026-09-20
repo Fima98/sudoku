@@ -1,6 +1,6 @@
 import type { CellState } from "./types";
 
-export default function generateGrid() {
+export function generateGrid() {
   const board: CellState[][] = Array.from({ length: 9 }, () =>
     Array.from({ length: 9 }, () => ({
       value: null,
@@ -56,4 +56,65 @@ function isValidPlacement(
   }
 
   return true;
+}
+
+export function pokeHoles(solvedGrid: CellState[][], holesToPoke = 40) {
+  const puzzle: CellState[][] = solvedGrid.map((row) =>
+    row.map((cell) => ({ value: cell.value, notes: new Set(cell.notes) })),
+  );
+
+  const positions: { r: number; c: number }[] = [];
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      // const val = puzzle[r][c].value;
+      // puzzle[r][c].value = null;
+      // const solutions = countSolution(puzzle);
+      // if (solutions >= 2) puzzle[r][c].value = val;
+      positions.push({ r, c });
+    }
+  }
+  positions.sort(() => Math.random() - 0.5);
+
+  let holesMade = 0;
+  for (const pos of positions) {
+    if (holesMade >= holesToPoke) break;
+
+    const { r, c } = pos;
+    const val = puzzle[r][c].value;
+    puzzle[r][c].value = null;
+    const solutions = countSolution(puzzle, { value: 0 });
+    if (solutions >= 2) {
+      puzzle[r][c].value = val;
+    } else {
+      holesMade++;
+    }
+  }
+
+  return puzzle;
+}
+
+function countSolution(board: CellState[][], count = { value: 0 }) {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c].value === null) {
+        for (let i = 1; i <= 9; i++) {
+          const val = i.toString();
+
+          if (isValidPlacement(board, r, c, val)) {
+            board[r][c].value = val;
+
+            countSolution(board, count);
+
+            board[r][c].value = null;
+
+            if (count.value >= 2) return count.value;
+          }
+        }
+        return count.value;
+      }
+    }
+  }
+
+  count.value++;
+  return count.value;
 }

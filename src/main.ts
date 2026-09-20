@@ -1,8 +1,7 @@
 import "./style.css";
 import { createBoard, renderBoard } from "./components/Board";
 import { createKeypad } from "./components/Keypad";
-import generateGrid from "./lib/generateGrid";
-import type { CellState } from "./lib/types";
+import { generateGrid, pokeHoles } from "./lib/generateGrid";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 
@@ -13,18 +12,18 @@ if (app) {
 
   // let currentState: GameState = "menu";
 
-  let gridState: CellState[][] = [];
-  for (let r = 0; r < 9; r++) {
-    const row: CellState[] = [];
-    for (let c = 0; c < 9; c++) {
-      row.push({ value: null, notes: new Set() });
-    }
-    gridState.push(row);
-  }
+  // let gridState: CellState[][] = [];
+  // for (let r = 0; r < 9; r++) {
+  //   const row: CellState[] = [];
+  //   for (let c = 0; c < 9; c++) {
+  //     row.push({ value: null, notes: new Set() });
+  //   }
+  //   gridState.push(row);
+  // }
 
   const solvedGrid = generateGrid();
 
-  gridState = solvedGrid;
+  const gridState = pokeHoles(solvedGrid, 40);
 
   let currentTool: { value: string | null; isNote: boolean } = {
     value: null,
