@@ -8,42 +8,40 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (app) {
   app.replaceChildren();
 
-  // type GameState = "menu" | "game";
+  // type GameState = "menu" | "game" | "victory";
 
   // let currentState: GameState = "menu";
 
-  // let gridState: CellState[][] = [];
-  // for (let r = 0; r < 9; r++) {
-  //   const row: CellState[] = [];
-  //   for (let c = 0; c < 9; c++) {
-  //     row.push({ value: null, notes: new Set() });
-  //   }
-  //   gridState.push(row);
-  // }
-
   const solvedGrid = generateGrid();
-
   const gridState = pokeHoles(solvedGrid, 40);
 
-  let currentTool: { value: string | null; isNote: boolean } = {
-    value: null,
-    isNote: false,
-  };
-
-  const keyPad = createKeypad((val, isNote) => {
-    currentTool = { value: val, isNote };
-  });
+  let selectedCell: {
+    row: number;
+    col: number;
+    element: HTMLElement;
+  } | null = null;
 
   const board = createBoard((cell) => {
-    if (!currentTool.value) return;
+    if (selectedCell?.element) {
+      selectedCell.element.style.backgroundColor = "";
+    }
 
     const row = Number(cell.dataset.row);
     const col = Number(cell.dataset.col);
+
+    selectedCell = { row, col, element: cell };
+    cell.style.backgroundColor = "var(--bg-selected)";
+  });
+
+  const keyPad = createKeypad((val, isNote) => {
+    if (!selectedCell || !val) return;
+
+    const { row, col, element: cell } = selectedCell;
     const cellData = gridState[row][col];
 
-    const val = currentTool.value;
+    if (cellData.value === solvedGrid[row][col].value) return;
 
-    if (currentTool.isNote) {
+    if (isNote) {
       cellData.value = null;
 
       if (cellData.notes.has(val)) {
@@ -84,11 +82,29 @@ if (app) {
       }
 
       cell.replaceChildren();
-      cell.style.color = "var(--text)";
       cell.style.fontSize = "18px";
+      const isError =
+        cellData.value !== null &&
+        cellData.value !== solvedGrid[row][col].value;
+
+      if (isError) {
+        cell.style.backgroundColor = "var(--bg-error, #8b0f0f)";
+        cell.style.color = "var(--text-error, #cadc82)";
+      } else {
+        cell.style.backgroundColor = "var(--bg-selected)";
+        cell.style.color = "var(--text)";
+      }
 
       if (cellData.value) {
         cell.textContent = cellData.value;
+      }
+
+      const isVictory = gridState.every((row, r) =>
+        row.every((cell, c) => cell.value === solvedGrid[r][c].value),
+      );
+
+      if (isVictory) {
+        console.log("VICTORY");
       }
     }
   });

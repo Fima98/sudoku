@@ -7,8 +7,6 @@ export function createBoard(
   container.className =
     "grid grid-cols-3 gap-1 bg-[var(--border)] border-4 border-[var(--border)] w-fit";
 
-  let selectedCellEl: HTMLElement | null = null;
-
   for (let blockIdx = 0; blockIdx < 9; blockIdx++) {
     const block = document.createElement("div");
     block.className = "grid grid-cols-3 gap-px bg-[var(--border)]";
@@ -33,13 +31,6 @@ export function createBoard(
   container.addEventListener("click", (e) => {
     const target = (e.target as HTMLElement).closest<HTMLElement>("[data-row]");
     if (!target) return;
-
-    if (selectedCellEl) {
-      selectedCellEl.classList.remove("!bg-[var(--bg-selected)]");
-    }
-
-    target.classList.add("!bg-[var(--bg-selected)]");
-    selectedCellEl = target;
 
     onCellSelect(target);
   });

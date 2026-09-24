@@ -6,6 +6,8 @@
   --bg-selected: #cadc82;
   --border: #0f380f;
   --text: #0f380f;
+  --bg-error: #306230;
+  --text-error: #cadc82;
 }
 
 @layer base {
