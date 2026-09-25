@@ -5,6 +5,45 @@ import { generateGrid, pokeHoles } from "./lib/generateGrid";
 import { createMenu } from "./components/Menu";
 import { createSolvedModal } from "./components/Solved";
 
+const SAVE_KEY = "sudoku_game_save";
+
+function saveGame() {
+  if (!gridState || !solvedGrid) return;
+  const serializedGrid = gridState.map((row) =>
+    row.map((cell) => ({
+      value: cell.value,
+      notes: Array.from(cell.notes),
+    })),
+  );
+  localStorage.setItem(
+    SAVE_KEY,
+    JSON.stringify({ solvedGrid, gridState: serializedGrid, currentHoles }),
+  );
+}
+
+function loadGame(): boolean {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    solvedGrid = data.solvedGrid;
+    currentHoles = data.currentHoles;
+    gridState = data.gridState.map((row: any[]) =>
+      row.map((cell: any) => ({
+        value: cell.value,
+        notes: new Set(cell.notes),
+      })),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearSave() {
+  localStorage.removeItem(SAVE_KEY);
+}
+
 const app = document.querySelector<HTMLDivElement>("#app");
 type GameState = "menu" | "game" | "victory";
 let currentState: GameState = "menu";
@@ -18,18 +57,47 @@ function render() {
   app.replaceChildren();
 
   if (currentState === "menu") {
-    const menu = createMenu((holes) => {
-      currentHoles = holes;
-      solvedGrid = generateGrid();
-      gridState = pokeHoles(solvedGrid, holes);
+    const hasSave = localStorage.getItem(SAVE_KEY) !== null;
+    const menu = createMenu(
+      (holes) => {
+        clearSave();
+        currentHoles = holes;
+        solvedGrid = generateGrid();
+        gridState = pokeHoles(solvedGrid, holes);
+        saveGame();
 
-      currentState = "game";
-      render();
-    });
+        currentState = "game";
+        render();
+      },
+      () => {
+        if (loadGame()) {
+          currentState = "game";
+          render();
+        }
+      },
+      hasSave,
+    );
     app.appendChild(menu);
   }
 
   if (currentState === "game") {
+    const header = document.createElement("div");
+    header.className =
+      "flex justify-between items-center w-full max-w-[288px] mb-2";
+
+    const pauseBtn = document.createElement("button");
+    pauseBtn.className =
+      "px-3 py-1 text-xs font-bold bg-[var(--bg-cell)] border-2 border-[var(--border)] text-[var(--text)] uppercase cursor-pointer active:bg-[var(--border)] active:text-[var(--bg-cell)]";
+    pauseBtn.textContent = "PAUSE";
+    pauseBtn.onclick = () => {
+      saveGame();
+      currentState = "menu";
+      render();
+    };
+
+    header.appendChild(pauseBtn);
+    app.appendChild(header);
+
     let selectedCell: {
       row: number;
       col: number;

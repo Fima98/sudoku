@@ -1,5 +1,7 @@
 export function createMenu(
   onStartGame: (holes: number) => void,
+  onResumeGame?: () => void,
+  hasSave: boolean = false,
 ): HTMLDivElement {
   const container = document.createElement("div");
   container.className =
@@ -12,6 +14,15 @@ export function createMenu(
 
   const buttonsContainer = document.createElement("div");
   buttonsContainer.className = "flex flex-col gap-3 w-full";
+
+  if (hasSave && onResumeGame) {
+    const continueBtn = document.createElement("button");
+    continueBtn.className =
+      "w-full py-2 bg-[var(--border)] text-[var(--bg-cell)] font-bold border-2 border-[var(--border)] cursor-pointer active:opacity-80 uppercase tracking-wide";
+    continueBtn.textContent = "CONTINUE";
+    continueBtn.onclick = onResumeGame;
+    buttonsContainer.appendChild(continueBtn);
+  }
 
   const levels = [
     { label: "EASY", holes: 30 },
